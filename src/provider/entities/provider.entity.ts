@@ -5,18 +5,21 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
-export type ProviderType = 'local' | 'google';
+export type ProviderType = 'local' | 'google' | 'github' | 'facebook';
 
-@Entity()
+@Entity('providers')
 export class Provider {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({
     type: 'enum',
-    enum: ['local', 'google'],
+    default: 'local',
+    enum: ['local', 'google', 'github', 'facebook'],
   })
   provider: ProviderType;
 
@@ -29,6 +32,12 @@ export class Provider {
     nullable: true,
   })
   password: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @JoinColumn()
   @OneToOne(() => User, (user) => user.provider)
