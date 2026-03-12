@@ -19,6 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(accessToken: string, refreshToken: string, profile: Profile) {
+    /// provide code
     console.log(accessToken);
     console.log(refreshToken);
     console.log(profile);
