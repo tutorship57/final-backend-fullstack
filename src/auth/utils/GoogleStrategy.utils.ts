@@ -23,5 +23,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     console.log(accessToken);
     console.log(refreshToken);
     console.log(profile);
+    this.authService.validateOAuthLogin(profile);
   }
 }
