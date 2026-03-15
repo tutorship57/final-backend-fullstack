@@ -1,12 +1,18 @@
 import { Provider } from 'src/provider/entities/provider.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-
-export type Role = 'user' | 'admin' | 'manager' | 'merchant' | 'editor';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { RoleEnum } from '../types/role';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({
     unique: true,
@@ -17,12 +23,7 @@ export class User {
   @Column({
     nullable: false,
   })
-  firstname: string;
-
-  @Column({
-    nullable: false,
-  })
-  lastname: string;
+  name: string;
 
   @Column({
     nullable: true,
@@ -33,12 +34,12 @@ export class User {
     enum: ['user', 'admin', 'manager', 'merchant', 'editor'],
     default: 'user',
   })
-  role: Role;
+  role: RoleEnum;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' }) 
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' }) 
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @OneToOne(() => Provider, (provider) => provider.user)
