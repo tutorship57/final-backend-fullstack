@@ -1,29 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserQueryFilters } from './types/userQueryFilter';
-import { FindOptionsWhere } from 'typeorm';
+import { userFindOneQuery, UserQueryFilters } from './types/userQueryFilter';
+import { RoleEnum } from './types/role';
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.userRepository.create(createUserDto);
   }
 
-  async findAll(filters: UserQueryFilters = {}) {
+  async findAll(filters: UserQueryFilters = {}, role: RoleEnum, id: string) {
     return await this.userRepository.findAll(filters);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(where: userFindOneQuery) {
+    if (!where || Object.keys(where).length === 0) {
+      throw new Error('Where condition is required');
+    }
+    return await this.userRepository.findOne(where);
   }
 
-  findByEmail(email: string) {
-    return email;
+  async findByEmail(email: string) {
+    return await this.userRepository.findByEmail(email);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

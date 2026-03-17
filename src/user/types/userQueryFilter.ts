@@ -10,3 +10,11 @@ export interface UserQueryFilters {
   limit?: number; //amount
   offset?: number; //beginning
 }
+
+export interface userFindOneQuery {
+  id?: string;
+  email?: string;
+  name?: string;
+  picture_url?: string;
+  role?: RoleEnum;
+}

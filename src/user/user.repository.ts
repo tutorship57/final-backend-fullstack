@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
-import { UserQueryFilters } from './types/userQueryFilter';
+import { userFindOneQuery, UserQueryFilters } from './types/userQueryFilter';
+import { CreateUserDto } from './dto/create-user.dto';
 @Injectable()
 export class UserRepository {
   constructor(
@@ -10,7 +11,10 @@ export class UserRepository {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async create() {}
+  async create(createUserDto: CreateUserDto) {
+    const newUser = this.userRepo.create(createUserDto);
+    return await this.userRepo.save(newUser);
+  }
 
   async findAll(filters: UserQueryFilters) {
     const { limit, offset, sortBy, sortOrder } = filters;
@@ -40,7 +44,9 @@ export class UserRepository {
     });
   }
 
-  async findOne(id: any) {}
+  async findOne(where: userFindOneQuery) {
+    return await this.userRepo.findOne({ where });
+  }
 
   async findByEmail(email: string) {
     return this.userRepo.findOne({

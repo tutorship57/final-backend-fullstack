@@ -18,12 +18,8 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   oauthCallback(@Req() req, @Res() res: Response) {
-    const user = req.user;
-    // console.log(req);
-    // const profile = oauthStrategy.
     // Handle the login success scenario.
     // You might want to create a session or generate a JWT token to send back to the client.
     // const redisCode = 'code';
-    // return res.redirect(`http://localhost:3000?code=${redisCode}`);
   }
 }
