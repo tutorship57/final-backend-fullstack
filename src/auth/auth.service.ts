@@ -2,11 +2,14 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Profile } from 'passport-google-oauth20';
 import { ProviderService } from 'src/provider/provider.service';
 import { UserService } from 'src/user/user.service';
+import { OauthLogin } from './types/loginOAuth.type';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly providerService: ProviderService,
+    private readonly jwtService: JwtService,
   ) {}
   async login(email: string, password: string) {}
 
@@ -34,7 +37,23 @@ export class AuthService {
       name: profile.displayName,
       picture_url: picture_url,
     };
+    const newUser = await this.userService.create(user);
 
-    return await this.userService.create(user);
+    const providerName = profile.provider;
+    const sub_id = profile.id;
+
+    await this.providerService.create({
+      provider: providerName,
+      sub_id: sub_id,
+      user: newUser.id,
+    });
+    return { ...newUser, provider: providerName };
+  }
+
+  loginByWithOAuth(oAuthLoginData: OauthLogin) {
+    const payload = { ...oAuthLoginData };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

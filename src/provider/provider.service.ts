@@ -1,13 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Provider } from './entities/provider.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProviderService {
-  constructor() {}
+  constructor(
+    @InjectRepository(Provider)
+    private readonly providerRepo: Repository<Provider>,
+  ) {}
 
   create(createProviderDto: CreateProviderDto) {
-    return 'This action adds a new provider';
+    const { password, user, sub_id, provider } = createProviderDto;
+    const createProviderPayload = {
+      provider,
+      sub_id,
+      user: { id: user },
+      ...(password && { password }),
+    };
+    const newProvider = this.providerRepo.create(createProviderPayload);
+    return this.providerRepo.save(newProvider);
   }
 
   findAll() {

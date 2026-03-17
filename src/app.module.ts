@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from './user/user.module';
 import { ProviderModule } from './provider/provider.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -24,6 +25,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: process.env.MODE !== 'prod' ? true : false,
       logging:
         process.env.MODE === 'prod' ? ['error', 'warn'] : ['query', 'error'],
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      useFactory: (ConfigService: ConfigService) => ({
+        secret: ConfigService.get('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     PassportModule.register({ session: true }),
