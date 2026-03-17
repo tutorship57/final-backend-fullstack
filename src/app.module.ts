@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from './user/user.module';
@@ -14,6 +14,7 @@ import { PermissionModule } from './permission/permission.module';
 import { BoardModule } from './board/board.module';
 import { ListModule } from './list/list.module';
 import { CardModule } from './card/card.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -31,6 +32,14 @@ import { CardModule } from './card/card.module';
       synchronize: process.env.MODE !== 'prod' ? true : false,
       logging:
         process.env.MODE === 'prod' ? ['error', 'warn'] : ['query', 'error'],
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      useFactory: (ConfigService: ConfigService) => ({
+        secret: ConfigService.get('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     PassportModule.register({ session: true }),
