@@ -7,6 +7,13 @@ import { PassportModule } from '@nestjs/passport';
 import { UserModule } from './user/user.module';
 import { ProviderModule } from './provider/provider.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { WorkspaceRoleModule } from './workspace-role/workspace-role.module';
+import { WorkspaceMemberModule } from './workspace-member/workspace-member.module';
+import { PermissionModule } from './permission/permission.module';
+import { BoardModule } from './board/board.module';
+import { ListModule } from './list/list.module';
+import { CardModule } from './card/card.module';
 
 @Module({
   imports: [
@@ -29,6 +36,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PassportModule.register({ session: true }),
     UserModule,
     ProviderModule,
+    WorkspaceModule,
+    WorkspaceMemberModule,
+    WorkspaceRoleModule,
+    PermissionModule,
+    BoardModule,
+    ListModule,
+    CardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
