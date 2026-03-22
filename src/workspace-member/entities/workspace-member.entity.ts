@@ -4,12 +4,14 @@ import { WorkspaceRole } from 'src/workspace-role/entities/workspace-role.entity
 import { Workspace } from 'src/workspace/entities/workspace.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('workspace_members')
@@ -22,6 +24,12 @@ export class WorkspaceMember {
 
   @Column()
   workspace_id: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToMany(() => WorkspaceRole)
   @JoinTable({

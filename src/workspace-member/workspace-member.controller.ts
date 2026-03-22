@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { WorkspaceMemberService } from './workspace-member.service';
 import { CreateWorkspaceMemberDto } from './dto/create-workspace-member.dto';
 import { UpdateWorkspaceMemberDto } from './dto/update-workspace-member.dto';
 
 @Controller('workspace-member')
 export class WorkspaceMemberController {
-  constructor(private readonly workspaceMemberService: WorkspaceMemberService) {}
+  constructor(
+    private readonly workspaceMemberService: WorkspaceMemberService,
+  ) {}
 
   @Post()
   create(@Body() createWorkspaceMemberDto: CreateWorkspaceMemberDto) {
@@ -19,16 +29,19 @@ export class WorkspaceMemberController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.workspaceMemberService.findOne(+id);
+    return this.workspaceMemberService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWorkspaceMemberDto: UpdateWorkspaceMemberDto) {
-    return this.workspaceMemberService.update(+id, updateWorkspaceMemberDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateWorkspaceMemberDto: UpdateWorkspaceMemberDto,
+  ) {
+    return this.workspaceMemberService.update(id, updateWorkspaceMemberDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.workspaceMemberService.remove(+id);
+    return this.workspaceMemberService.remove(id);
   }
 }
