@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   InternalServerErrorException,
@@ -11,6 +12,7 @@ import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './utils/Google.guard';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +26,13 @@ export class AuthController {
   async oauthLogin() {}
 
   @Post('/login')
-  async login() {}
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    const { access_token } = await this.authService.login(loginDto);
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+    });
+    return res.sendStatus(200);
+  }
 
   @Post('register')
   async register() {}

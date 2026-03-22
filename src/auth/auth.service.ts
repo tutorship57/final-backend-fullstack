@@ -1,19 +1,83 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Profile } from 'passport-google-oauth20';
 import { ProviderService } from 'src/provider/provider.service';
 import { UserService } from 'src/user/user.service';
 import { OauthLogin } from './types/loginOAuth.type';
 import { JwtService } from '@nestjs/jwt';
+import { SecurityService } from 'src/common/security/security.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly providerService: ProviderService,
     private readonly jwtService: JwtService,
+    private readonly securityService: SecurityService,
   ) {}
-  async login(email: string, password: string) {}
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-  async register(username: string, email: string, password: string) {}
+    const providerInfo = await this.providerService.findOne({
+      userId: user.id,
+    });
+    if (!providerInfo || providerInfo.provider != 'local') {
+      throw new BadRequestException();
+    }
+
+    const passwordMatch = await this.securityService.verifyPassword(
+      password,
+      providerInfo.password,
+    );
+
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = { email: user.email, sub: user.id };
+    const access_token = await this.jwtService.signAsync(payload);
+    return { access_token: access_token };
+  }
+
+  async register(createUserDto: RegisterDto) {
+    const { email, name } = createUserDto;
+    const existEmail = await this.userService.findByEmail(email);
+
+    if (existEmail) {
+      throw new ConflictException();
+    }
+
+    const hashedPassword = await this.securityService.hashPassword(
+      createUserDto.password,
+    );
+
+    const newUser = await this.userService.create({
+      email,
+      name,
+    });
+
+    const newProviderData = await this.providerService.create({
+      password: hashedPassword,
+      user: newUser.id,
+      provider: 'local',
+    });
+
+    return {
+      id: newUser.id,
+      email: newUser.email,
+      provider: newProviderData.provider,
+      provider_id: newProviderData.id,
+    };
+  }
 
   async validateOAuthLogin(profile: Profile) {
     const email = profile?.emails?.[0]?.value;

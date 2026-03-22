@@ -5,8 +5,9 @@ import { PassportModule } from '@nestjs/passport';
 import { GoogleStrategy } from './utils/GoogleStrategy.utils';
 import { UserModule } from 'src/user/user.module';
 import { ProviderModule } from 'src/provider/provider.module';
+import { SecurityModule } from 'src/common/security/security.module';
 @Module({
-  imports: [PassportModule, UserModule, ProviderModule],
+  imports: [PassportModule, UserModule, ProviderModule, SecurityModule],
   providers: [AuthService, GoogleStrategy],
   controllers: [AuthController],
 })
