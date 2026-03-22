@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskCardDto } from './dto/create-task-card.dto';
 import { UpdateTaskCardDto } from './dto/update-task-card.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TaskCard } from './entities/task-card.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TaskCardService {
+  constructor(
+    @InjectRepository(TaskCard)
+    private readonly taskCardRepo: Repository<TaskCard>,
+  ) {}
   create(createTaskCardDto: CreateTaskCardDto) {
-    return 'This action adds a new taskCard';
+    const newTaskCard = this.taskCardRepo.create(createTaskCardDto);
+    return this.taskCardRepo.save(newTaskCard);
   }
 
   findAll() {
-    return `This action returns all taskCard`;
+    return this.taskCardRepo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} taskCard`;
+  findOne(id: string) {
+    return this.taskCardRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
   }
 
-  update(id: number, updateTaskCardDto: UpdateTaskCardDto) {
-    return `This action updates a #${id} taskCard`;
+  async update(id: string, updateTaskCardDto: UpdateTaskCardDto) {
+    const existTaskCard = await this.findOne(id);
+    if (!existTaskCard) {
+      throw new NotFoundException();
+    }
+    const updated = this.taskCardRepo.merge(existTaskCard, updateTaskCardDto);
+    return this.taskCardRepo.save(updated);
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} taskCard`;
+  async remove(id: string) {
+    const removed = await this.taskCardRepo.delete(id);
+    if (removed.affected === 0) {
+      throw new NotFoundException();
+    }
+    return { id };
   }
 }
