@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Workspace } from 'src/workspace/entities/workspace.entity';
 import { List } from 'src/list/entities/list.entity';
@@ -22,6 +24,12 @@ export class Board {
 
   @Column()
   workspace_id: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   // Link to the Workspace
   @ManyToOne(() => Workspace, (workspace) => workspace.boards)

@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Board } from './entities/board.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BoardService {
+  constructor(
+    @InjectRepository(Board)
+    private readonly boardRepo: Repository<Board>,
+  ) {}
+
   create(createBoardDto: CreateBoardDto) {
-    return 'This action adds a new board';
+    const newBoard = this.boardRepo.create(createBoardDto);
+    return this.boardRepo.save(newBoard);
   }
 
   findAll() {
-    return `This action returns all board`;
+    return this.boardRepo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} board`;
+  findOne(id: string) {
+    return this.boardRepo.findOne({
+      where: {
+        id: id,
+      },
+    });
   }
 
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async update(id: string, updateBoardDto: UpdateBoardDto) {
+    const existBoard = await this.findOne(id);
+    if (!existBoard) {
+      throw new NotFoundException();
+    }
+    const updated = this.boardRepo.merge(existBoard, updateBoardDto);
+    return this.boardRepo.save(updated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} board`;
+  async remove(id: string) {
+    const removed = await this.boardRepo.delete(id);
+
+    if (removed.affected === 0) {
+      throw new NotFoundException();
+    }
+    return { id };
   }
 }
