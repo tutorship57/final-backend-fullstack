@@ -12,8 +12,8 @@ export class WorkspaceRepository {
   ) {}
 
   async create(createWorkspaceDto: CreateWorkspaceDto) {
-    const newUser = this.repo.create(createWorkspaceDto);
-    return await this.repo.save(newUser);
+    const newWorkspace = this.repo.create(createWorkspaceDto);
+    return await this.repo.save(newWorkspace);
   }
 
   async findById(id: string): Promise<Workspace | null> {
