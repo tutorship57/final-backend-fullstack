@@ -3,11 +3,13 @@ import { User } from 'src/user/entities/user.entity';
 import { WorkspaceMember } from 'src/workspace-member/entities/workspace-member.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('workspaces')
@@ -21,6 +23,12 @@ export class Workspace {
   // The creator/owner of the workspace
   @Column()
   owner_id: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'owner_id' })

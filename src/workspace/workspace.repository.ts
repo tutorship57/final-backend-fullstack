@@ -1,0 +1,38 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Workspace } from './entities/workspace.entity';
+import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
+import { CreateWorkspaceDto } from './dto/create-workspace.dto';
+import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+@Injectable()
+export class WorkspaceRepository {
+  constructor(
+    @InjectRepository(Workspace)
+    private readonly repo: Repository<Workspace>,
+  ) {}
+
+  async create(createWorkspaceDto: CreateWorkspaceDto) {
+    const newUser = this.repo.create(createWorkspaceDto);
+    return await this.repo.save(newUser);
+  }
+
+  async findById(id: string): Promise<Workspace | null> {
+    return await this.repo.findOne({ where: { id: id } });
+  }
+
+  async update(
+    workspace: Workspace,
+    dto: UpdateWorkspaceDto,
+  ): Promise<Workspace> {
+    const updated = this.repo.merge(workspace, dto);
+    return await this.repo.save(updated);
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.repo.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Workspace with ID ${id} not found`);
+    }
+  }
+}

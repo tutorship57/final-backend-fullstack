@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Workspace } from './entities/workspace.entity';
+import { Repository } from 'typeorm';
+import { WorkspaceRepository } from './workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
+  constructor(private readonly workspaceRepo: WorkspaceRepository) {}
   create(createWorkspaceDto: CreateWorkspaceDto) {
-    return 'This action adds a new workspace';
+    return this.workspaceRepo.create(createWorkspaceDto);
   }
 
   findAll() {
     return `This action returns all workspace`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workspace`;
+  findOne(id: string) {
+    return this.workspaceRepo.findById(id);
   }
 
-  update(id: number, updateWorkspaceDto: UpdateWorkspaceDto) {
-    return `This action updates a #${id} workspace`;
+  async update(id: string, dto: UpdateWorkspaceDto) {
+    const workspace = await this.workspaceRepo.findById(id);
+
+    if (!workspace) {
+      throw new NotFoundException(`ไม่พบ Workspace ID: ${id} ในระบบ`);
+    }
+
+    return await this.workspaceRepo.update(workspace, dto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workspace`;
+  remove(id: string) {
+    return this.workspaceRepo.remove(id);
   }
 }
