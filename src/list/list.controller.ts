@@ -39,4 +39,10 @@ export class ListController {
   remove(@Param('id') id: string) {
     return this.listService.remove(+id);
   }
+
+  @Get('board/:boardId')
+  async getBoardData(@Param('boardId') boardId: string) {
+    // This calls the service method we discussed earlier
+    return await this.listService.getListsWithTasks(boardId);
+  }
 }

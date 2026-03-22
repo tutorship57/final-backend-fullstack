@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Board } from 'src/board/entities/board.entity';
-import { Card } from 'src/card/entities/card.entity';
+import { TaskCard } from 'src/task-card/entities/task-card.entity';
 
 @Entity('lists')
 export class List {
@@ -27,6 +27,6 @@ export class List {
   @JoinColumn({ name: 'board_id' })
   board: Board;
 
-  @OneToMany(() => Card, (card) => card.list)
-  cards: Card[];
+  @OneToMany(() => TaskCard, (taskCard) => taskCard.list)
+  taskCards: TaskCard[];
 }
