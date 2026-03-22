@@ -5,7 +5,7 @@ export class CreateProviderDto {
   provider: ProviderType;
 
   @IsUUID()
-  sub_id: string;
+  sub_id?: string;
 
   @IsString()
   @IsOptional()

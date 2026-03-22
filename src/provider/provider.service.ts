@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateProviderDto } from './dto/create-provider.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Provider } from './entities/provider.entity';
-import { Repository } from 'typeorm';
+import { Provider, ProviderType } from './entities/provider.entity';
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { ProviderFindOneQuery } from './types/providerQueryFilter';
 
 @Injectable()
 export class ProviderService {
@@ -28,8 +29,17 @@ export class ProviderService {
     return `This action returns all provider`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} provider`;
+  findOne(filters: ProviderFindOneQuery) {
+    if (!filters || Object.keys(filters).length === 0) {
+      throw new Error('Where condition is required');
+    }
+    const { userId, ...rest } = filters;
+    return this.providerRepo.findOne({
+      where: {
+        ...rest,
+        user: userId ? { id: userId } : undefined,
+      } as FindOptionsWhere<Provider>,
+    });
   }
 
   update(id: number, updateProviderDto: UpdateProviderDto) {
