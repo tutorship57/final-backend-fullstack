@@ -1,5 +1,12 @@
 import { WorkspaceRole } from 'src/workspace-role/entities/workspace-role.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('permissions')
 export class Permission {
@@ -8,6 +15,12 @@ export class Permission {
 
   @Column({ unique: true })
   name: string; // e.g., 'workspace:invite', 'board:delete'
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToMany(() => WorkspaceRole, (role) => role.permissions)
   roles: WorkspaceRole[];
