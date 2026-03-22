@@ -27,17 +27,17 @@ export class ListController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.listService.findOne(+id);
+    return this.listService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateListDto: UpdateListDto) {
-    return this.listService.update(+id, updateListDto);
+    return this.listService.update(id, updateListDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.listService.remove(+id);
+    return this.listService.remove(id);
   }
 
   @Get('board/:boardId')

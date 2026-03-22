@@ -27,7 +27,7 @@ export class WorkspaceRoleController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.workspaceRoleService.findOne(+id);
+    return this.workspaceRoleService.findOne(id);
   }
 
   @Patch(':id')
@@ -35,11 +35,11 @@ export class WorkspaceRoleController {
     @Param('id') id: string,
     @Body() updateWorkspaceRoleDto: UpdateWorkspaceRoleDto,
   ) {
-    return this.workspaceRoleService.update(+id, updateWorkspaceRoleDto);
+    return this.workspaceRoleService.update(id, updateWorkspaceRoleDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.workspaceRoleService.remove(+id);
+    return this.workspaceRoleService.remove(id);
   }
 }

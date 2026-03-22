@@ -13,7 +13,6 @@ import { WorkspaceMemberModule } from './workspace-member/workspace-member.modul
 import { PermissionModule } from './permission/permission.module';
 import { BoardModule } from './board/board.module';
 import { ListModule } from './list/list.module';
-import { CardModule } from './taskCards/card.module';
 import { JwtModule } from '@nestjs/jwt';
 import { TaskCardModule } from './task-card/task-card.module';
 
@@ -52,7 +51,6 @@ import { TaskCardModule } from './task-card/task-card.module';
     PermissionModule,
     BoardModule,
     ListModule,
-    CardModule,
     TaskCardModule,
   ],
   controllers: [AppController],

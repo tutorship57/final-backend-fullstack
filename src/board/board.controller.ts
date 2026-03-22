@@ -19,16 +19,16 @@ export class BoardController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.boardService.findOne(+id);
+    return this.boardService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardService.update(+id, updateBoardDto);
+    return this.boardService.update(id, updateBoardDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.boardService.remove(+id);
+    return this.boardService.remove(id);
   }
 }

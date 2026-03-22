@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TaskCardService } from './task-card.service';
 import { CreateTaskCardDto } from './dto/create-task-card.dto';
 import { UpdateTaskCardDto } from './dto/update-task-card.dto';
@@ -19,16 +27,19 @@ export class TaskCardController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.taskCardService.findOne(+id);
+    return this.taskCardService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskCardDto: UpdateTaskCardDto) {
-    return this.taskCardService.update(+id, updateTaskCardDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskCardDto: UpdateTaskCardDto,
+  ) {
+    return this.taskCardService.update(id, updateTaskCardDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.taskCardService.remove(+id);
+    return this.taskCardService.remove(id);
   }
 }
