@@ -25,7 +25,7 @@ export class WorkspaceService {
     const workspace = await this.workspaceRepo.findById(id);
 
     if (!workspace) {
-      throw new NotFoundException(`ไม่พบ Workspace ID: ${id} ในระบบ`);
+      throw new NotFoundException();
     }
 
     return await this.workspaceRepo.update(workspace, dto);
