@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,26 +12,39 @@ export class ListService {
     private listRepository: Repository<List>,
   ) {}
   create(createListDto: CreateListDto) {
-    return 'This action adds a new list';
+    const newList = this.listRepository.create(createListDto);
+    return this.listRepository.save(newList);
   }
 
   findAll() {
-    return `This action returns all list`;
+    return this.listRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} list`;
+  findOne(id: string) {
+    return this.listRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+  }
+  async update(id: string, updateListDto: UpdateListDto) {
+    const existedList = await this.findOne(id);
+    if (!existedList) {
+      throw new NotFoundException();
+    }
+    const updated = this.listRepository.merge(existedList, updateListDto);
+
+    return this.listRepository.save(updated);
   }
 
-  update(id: number, updateListDto: UpdateListDto) {
-    return `This action updates a #${id} list`;
+  async remove(id: string) {
+    const removed = await this.listRepository.delete(id);
+    if (removed.affected === 0) {
+      throw new NotFoundException();
+    }
+    return { id };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} list`;
-  }
-
-  //GET: List with Task
   async getListsWithTasks(boardId: string) {
     return await this.listRepository
       .createQueryBuilder('list')

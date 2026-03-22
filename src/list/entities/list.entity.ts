@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Board } from 'src/board/entities/board.entity';
 import { TaskCard } from 'src/task-card/entities/task-card.entity';
@@ -22,6 +24,12 @@ export class List {
 
   @Column()
   board_id: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToOne(() => Board, (board) => board.lists)
   @JoinColumn({ name: 'board_id' })
