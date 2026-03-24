@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SecurityService } from 'src/common/security/security.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { User } from 'src/user/entities/user.entity';
 @Injectable()
 export class AuthService {
   constructor(
@@ -90,9 +91,10 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const userExist = await this.userService.findByEmail(email);
+    const userExist: User | null = await this.userService.findByEmail(email);
     console.log(userExist);
     if (userExist) {
+      // console.log()/
       return userExist;
     }
 
