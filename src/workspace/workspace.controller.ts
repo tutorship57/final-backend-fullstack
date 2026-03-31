@@ -14,6 +14,7 @@ import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller('workspace')
 @Authorized('user', 'admin', 'superAdmin')
+@Controller('users/:user_id/workspace')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 

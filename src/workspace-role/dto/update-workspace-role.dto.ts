@@ -1,6 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateWorkspaceRoleDto } from './create-workspace-role.dto';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
+export class UpdateWorkspaceRoleDto {
+  @IsString()
+  @IsOptional()
+  name: string;
 
-export class UpdateWorkspaceRoleDto extends PartialType(
-  CreateWorkspaceRoleDto,
-) {}
+  @IsUUID()
+  @IsOptional()
+  workspace_id: string;
+}
