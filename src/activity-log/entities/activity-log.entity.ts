@@ -10,14 +10,14 @@ export class ActivityLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   user_id: string;
 
   @Column({ type: 'uuid', nullable: true })
   workspace_id: string;
 
-  @Column({ type: 'varchar' })
-  action: string;
+  //   @Column({ type: 'varchar' })
+  //   action: string;
 
   @Column({ type: 'varchar' })
   method: string;
@@ -27,6 +27,9 @@ export class ActivityLog {
 
   @Column({ type: 'int' })
   status_code: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  ip_address: string;
 
   @Column({ type: 'varchar', nullable: true })
   target_type: string;

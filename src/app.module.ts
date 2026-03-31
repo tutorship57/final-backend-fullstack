@@ -15,11 +15,9 @@ import { BoardModule } from './board/board.module';
 import { ListModule } from './list/list.module';
 import { JwtModule } from '@nestjs/jwt';
 import { TaskCardModule } from './task-card/task-card.module';
-import { PermissionRoleModule } from './permission-role/permission-role.module';
-import { MemberRoleModule } from './member-role/member-role.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
-import { PermissionRoleModule } from './permission-role/permission-role.module';
-import { MemberRoleModule } from './member-role/member-role.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './interceptor/logging.interceptor';
 
 @Module({
   imports: [
@@ -57,11 +55,15 @@ import { MemberRoleModule } from './member-role/member-role.module';
     BoardModule,
     ListModule,
     TaskCardModule,
-    PermissionRoleModule,
-    MemberRoleModule,
     ActivityLogModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}

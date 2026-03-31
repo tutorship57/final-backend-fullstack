@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -12,7 +13,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+  app.use(morgan('dev'));
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableCors({

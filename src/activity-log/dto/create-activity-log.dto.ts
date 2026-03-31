@@ -2,7 +2,8 @@ import { IsInt, IsOptional, IsString, IsUUID, IsObject } from 'class-validator';
 
 export class CreateActivityLogDto {
   @IsUUID()
-  user_id: string;
+  @IsOptional()
+  user_id?: string;
 
   @IsOptional()
   @IsUUID()
@@ -23,6 +24,10 @@ export class CreateActivityLogDto {
   @IsOptional()
   @IsString()
   target_type?: string;
+
+  @IsOptional()
+  @IsString()
+  ip_address?: string;
 
   @IsOptional()
   @IsUUID()
