@@ -10,8 +10,10 @@ import {
 import { WorkspaceService } from './workspace.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
+import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller('workspace')
+@Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
