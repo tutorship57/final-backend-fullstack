@@ -18,7 +18,7 @@ export class WorkspaceRole {
   id: string;
 
   @Column()
-  name: string; // e.g., 'Manager' or 'Moderator'
+  name: string;
 
   @Column()
   workspace_id: string;

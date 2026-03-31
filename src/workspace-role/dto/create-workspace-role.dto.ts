@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 export class CreateWorkspaceRoleDto {
   @IsString()
   @IsNotEmpty()
@@ -7,4 +13,9 @@ export class CreateWorkspaceRoleDto {
   @IsUUID()
   @IsNotEmpty()
   workspace_id: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  permissions?: string[];
 }

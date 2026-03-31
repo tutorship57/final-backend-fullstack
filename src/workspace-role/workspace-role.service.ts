@@ -11,12 +11,15 @@ export class WorkspaceRoleService {
     @InjectRepository(WorkspaceRole)
     private readonly workspaceRoleRepo: Repository<WorkspaceRole>,
   ) {}
-  create(createWorkspaceRoleDto: CreateWorkspaceRoleDto) {
-    const newWorkspaceRole = this.workspaceRoleRepo.create(
-      createWorkspaceRoleDto,
-    );
+  async create(createWorkspaceRoleDto: CreateWorkspaceRoleDto) {
+    const { name, workspace_id, permissions } = createWorkspaceRoleDto;
 
-    return this.workspaceRoleRepo.save(newWorkspaceRole);
+    const newWorkspaceRole = this.workspaceRoleRepo.create({
+      name,
+      workspace_id,
+      permissions: permissions?.map((id) => ({ id })),
+    });
+    return await this.workspaceRoleRepo.save(newWorkspaceRole);
   }
 
   findAll() {
