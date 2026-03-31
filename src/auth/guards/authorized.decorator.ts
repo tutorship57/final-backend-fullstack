@@ -4,8 +4,5 @@ import { GoogleAuthGuard } from './google-auth.guard';
 import { roleType } from './roles.decorator';
 
 export const Authorized = (...roles: roleType[]) => {
-  return applyDecorators(
-    SetMetadata('roles', roles),
-    UseGuards(GoogleAuthGuard, RolesGuard),
-  );
+  return applyDecorators(SetMetadata('roles', roles), UseGuards(RolesGuard));
 };

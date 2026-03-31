@@ -4,4 +4,8 @@ export class CreateWorkspaceDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  owner_id: string;
 }

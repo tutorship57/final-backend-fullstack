@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { WorkspaceRepository } from './workspace.repository';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Injectable()
+@UseGuards(JwtAuthGuard)
 export class WorkspaceService {
   constructor(private readonly workspaceRepo: WorkspaceRepository) {}
   create(createWorkspaceDto: CreateWorkspaceDto) {
@@ -27,7 +29,6 @@ export class WorkspaceService {
 
     return await this.workspaceRepo.update(workspace, dto);
   }
-
   remove(id: string) {
     return this.workspaceRepo.remove(id);
   }

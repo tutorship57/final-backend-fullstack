@@ -11,21 +11,30 @@ import { WorkspaceService } from './workspace.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
+import { WorkspaceRepository } from './workspace.repository';
 
-@Controller('workspace')
-@Authorized('user', 'admin', 'superAdmin')
 @Controller('users/:user_id/workspace')
+@Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceController {
-  constructor(private readonly workspaceService: WorkspaceService) {}
+  constructor(
+    private readonly workspaceService: WorkspaceService,
+    private readonly workspaceRepository: WorkspaceRepository,
+  ) {}
 
   @Post()
-  create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
-    return this.workspaceService.create(createWorkspaceDto);
+  create(
+    @Param('user_id') userId: string,
+    @Body() createWorkspaceDto: CreateWorkspaceDto,
+  ) {
+    return this.workspaceService.create({
+      ...createWorkspaceDto,
+      owner_id: userId,
+    });
   }
 
   @Get()
-  findAll() {
-    return this.workspaceService.findAll();
+  findAll(@Param('user_id') userId: string) {
+    return this.workspaceRepository.findUserWorkspaces(userId);
   }
 
   @Get(':id')

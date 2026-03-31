@@ -13,6 +13,7 @@ import { SecurityService } from 'src/common/security/security.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from 'src/user/entities/user.entity';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly securityService: SecurityService,
   ) {}
+
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
     const user = await this.userService.findByEmail(email);
@@ -44,7 +46,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user.id };
+    // 1. ADDED 'role' TO LOCAL LOGIN PAYLOAD
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    };
+
     const access_token = await this.jwtService.signAsync(payload);
     return { access_token: access_token };
   }
@@ -83,25 +91,26 @@ export class AuthService {
   async validateOAuthLogin(profile: Profile) {
     const email = profile?.emails?.[0]?.value;
     const picture_url = profile?.photos?.[0].value;
+
     if (!email) {
       throw new UnauthorizedException('Email not found in profile');
     }
-    console.log('this is the validated call ,', profile);
+
     if (!profile) {
       throw new UnauthorizedException();
     }
 
     const userExist: User | null = await this.userService.findByEmail(email);
-    console.log(userExist);
+
     if (userExist) {
-      // console.log()/
-      return userExist;
+      return userExist; // This returns the full User entity, including role!
     }
 
     const user = {
       email: email,
       name: profile.displayName,
       picture_url: picture_url,
+      // If you want to assign a default role to new OAuth users, do it in your UserService.create() or add it here
     };
     const newUser = await this.userService.create(user);
 
@@ -113,14 +122,18 @@ export class AuthService {
       sub_id: sub_id,
       user: newUser.id,
     });
+
     return { ...newUser, provider: providerName };
   }
 
   loginByWithOAuth(oAuthLoginData: OauthLogin) {
+    // 2. ADDED 'role' TO OAUTH LOGIN PAYLOAD
     const payload = {
       email: oAuthLoginData.email,
-      sub: oAuthLoginData.id, // Ensure your OauthLogin type has the user 'id'
+      sub: oAuthLoginData.id,
+      role: oAuthLoginData.role,
     };
+
     return {
       access_token: this.jwtService.sign(payload),
     };

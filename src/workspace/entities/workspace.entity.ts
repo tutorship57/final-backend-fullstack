@@ -22,7 +22,7 @@ export class Workspace {
 
   // The creator/owner of the workspace
   @Column()
-  owner_id: number;
+  owner_id: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
