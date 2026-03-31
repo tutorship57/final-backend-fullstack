@@ -1,10 +1,14 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsArray, IsNotEmpty, IsUUID } from 'class-validator';
 export class CreateWorkspaceMemberDto {
   @IsUUID()
   @IsNotEmpty()
   user_id: string;
 
-  @IsNotEmpty()
   @IsUUID()
+  @IsNotEmpty()
   workspace_id: string;
+
+  @IsArray()
+  @IsUUID('all', { each: true })
+  role_ids: string[];
 }

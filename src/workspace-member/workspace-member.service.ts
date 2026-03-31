@@ -11,9 +11,15 @@ export class WorkspaceMemberService {
     @InjectRepository(WorkspaceMember)
     private readonly workspaceMemberRepo: Repository<WorkspaceMember>,
   ) {}
-  create(createWorkspaceMemberDto: CreateWorkspaceMemberDto) {
-    const newMember = this.workspaceMemberRepo.create(createWorkspaceMemberDto);
-    return this.workspaceMemberRepo.save(newMember);
+  async create(dto: CreateWorkspaceMemberDto) {
+    const { role_ids, ...rest } = dto;
+
+    const member = this.workspaceMemberRepo.create({
+      ...rest,
+      roles: role_ids.map((id) => ({ id })),
+    });
+
+    return this.workspaceMemberRepo.save(member);
   }
 
   findAll() {
