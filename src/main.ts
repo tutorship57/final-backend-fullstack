@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   );
   //Middleware: cookieParser()
   // - Read the cookie header from incoming request and parse the string to java object
+  app.use(morgan('dev'));
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   //Middleware: enableCors()
