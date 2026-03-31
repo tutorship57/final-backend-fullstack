@@ -117,7 +117,10 @@ export class AuthService {
   }
 
   loginByWithOAuth(oAuthLoginData: OauthLogin) {
-    const payload = { ...oAuthLoginData };
+    const payload = {
+      email: oAuthLoginData.email,
+      sub: oAuthLoginData.id, // Ensure your OauthLogin type has the user 'id'
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };

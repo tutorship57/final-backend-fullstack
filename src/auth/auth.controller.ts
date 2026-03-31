@@ -13,6 +13,7 @@ import { GoogleAuthGuard } from './types/Google.guard';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,14 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard) // You will need a guard that checks the cookie
+  getProfile(@Req() req) {
+    // The JwtAuthGuard will validate the token and attach the user to the request
+    // Now you just return that user data to the frontend!
+    return req.user; 
+  }
 
   @Get('oauth/google')
   @UseGuards(GoogleAuthGuard)
