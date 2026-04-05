@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WorkspaceMember } from './entities/workspace-member.entity';
 import { Workspace } from '../workspace/entities/workspace.entity'; // <-- 1. Import Workspace Entity
 import { Repository } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class WorkspaceMemberService {
@@ -19,6 +20,8 @@ export class WorkspaceMemberService {
     // 2. Inject the Workspace Repo so we can verify the owner!
     @InjectRepository(Workspace)
     private readonly workspaceRepo: Repository<Workspace>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   async create(dto: CreateWorkspaceMemberDto) {
@@ -37,7 +40,61 @@ export class WorkspaceMemberService {
   findOne(id: string) {
     return this.workspaceMemberRepo.findOne({ where: { id: id } });
   }
+  async inviteMember(
+    workspaceId: string,
+    inviterId: string,
+    email: string,
+    roleIds: string[],
+  ) {
+    // 1. Get Workspace and check if inviter is Owner
+    const workspace = await this.workspaceRepo.findOne({
+      where: { id: workspaceId },
+    });
+    if (!workspace) throw new NotFoundException('Workspace not found');
 
+    const isOwner = workspace.owner_id === inviterId;
+
+    // 2. If not owner, check for 'Manage-Member' permission
+    if (!isOwner) {
+      const inviterMember = await this.workspaceMemberRepo.findOne({
+        where: { workspace_id: workspaceId, user_id: inviterId },
+        relations: ['roles', 'roles.permissions'],
+      });
+
+      const hasPermission = inviterMember?.roles.some((role) =>
+        role.permissions.some((p) => p.name === 'Manage-Member'),
+      );
+
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          'You do not have permission to manage members',
+        );
+      }
+    }
+
+    // 3. Find the user being invited
+    const userToInvite = await this.userRepo.findOne({ where: { email } });
+    if (!userToInvite)
+      throw new NotFoundException('User with this email not found');
+
+    // 4. Check if user is already a member
+    const existing = await this.workspaceMemberRepo.findOne({
+      where: { workspace_id: workspaceId, user_id: userToInvite.id },
+    });
+    if (existing)
+      throw new ForbiddenException(
+        'User is already a member of this workspace',
+      );
+
+    // 5. Create Member immediately with selected roles
+    const newMember = this.workspaceMemberRepo.create({
+      workspace_id: workspaceId,
+      user_id: userToInvite.id,
+      roles: roleIds.map((id) => ({ id }) as any),
+    });
+
+    return this.workspaceMemberRepo.save(newMember);
+  }
   async update(id: string, updateWorkspaceMemberDto: UpdateWorkspaceMemberDto) {
     const existMember = await this.workspaceMemberRepo.findOne({
       where: { id: id },
@@ -58,20 +115,14 @@ export class WorkspaceMemberService {
   }
 
   async findMembersWithRoles(workspaceId: string) {
-    const members = await this.workspaceMemberRepo
+    return await this.workspaceMemberRepo
       .createQueryBuilder('member')
-      .innerJoin('users', 'user', 'user.id = member.user_id')
-      .leftJoin('workspace_roles', 'role', 'role.id = member.role_id')
+      // Use the defined relation 'user' instead of raw 'users' table
+      .innerJoinAndSelect('member.user', 'user')
+      // Join the ManyToMany roles relationship
+      .leftJoinAndSelect('member.roles', 'roles')
       .where('member.workspace_id = :workspaceId', { workspaceId })
-      .select([
-        'member.id AS id',
-        'user.name AS name',
-        'user.email AS email',
-        'role.name AS role',
-      ])
-      .getRawMany();
-
-    return members;
+      .getMany();
   }
 
   async assignRole(
@@ -80,27 +131,22 @@ export class WorkspaceMemberService {
     memberId: string,
     roleId: string,
   ) {
-    // 3. FIXED: Query the WORKSPACE repo, not the Member repo!
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },
     });
-
     if (!workspace) throw new NotFoundException('Workspace not found');
-
-    // 4. FIXED: Compare owner_id to userId (your code compared workspace.id to userId)
-    if (workspace.owner_id !== userId) {
-      throw new ForbiddenException(
-        'Security Alert: Only the workspace owner can assign roles.',
-      );
-    }
+    if (workspace.owner_id !== userId)
+      throw new ForbiddenException('Only owner can assign roles');
 
     const member = await this.workspaceMemberRepo.findOne({
       where: { id: memberId },
+      relations: ['roles'], // Load existing roles
     });
+
     if (!member) throw new NotFoundException('Member not found');
 
-    // 5. FIXED: Update role_id, not the member's primary ID!
-    member.id = roleId;
+    // To replace the role:
+    member.roles = [{ id: roleId } as any];
 
     return this.workspaceMemberRepo.save(member);
   }

@@ -29,7 +29,7 @@ export class BoardController {
   @Get()
   findAll(
     @Param('workspace_id') workspaceId: string,
-    @Param('user-id') userId: string,
+    @Param('user_id') userId: string,
   ) {
     return this.boardService.findBoardWorkspace(workspaceId, userId);
   }

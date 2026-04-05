@@ -34,6 +34,16 @@ export class WorkspaceRole {
   workspace: Workspace;
 
   @ManyToMany(() => Permission, (perm) => perm.roles)
-  @JoinTable({ name: 'role_permissions' })
+  @JoinTable({
+    name: 'role_permissions',
+    joinColumn: {
+      name: 'workspaceRolesId', // Matches your SQL: workspaceRolesId
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permissionsId', // Matches your SQL: permissionsId
+      referencedColumnName: 'id',
+    },
+  })
   permissions: Permission[];
 }
