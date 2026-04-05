@@ -28,6 +28,19 @@ export class WorkspaceMemberController {
   findAll() {
     return this.workspaceMemberService.findAll();
   }
+  @Post('workspace/:workspace_id/invite')
+  invite(
+    @Param('workspace_id') workspaceId: string,
+    @Param('user_id') inviterId: string, // From URL prefix users/:user_id
+    @Body() body: { email: string; roleIds: string[] },
+  ) {
+    return this.workspaceMemberService.inviteMember(
+      workspaceId,
+      inviterId,
+      body.email,
+      body.roleIds,
+    );
+  }
   @Get('workspace/:workspaceId/members')
   findWorkspaceMembers(@Param('workspaceId') workspaceId: string) {
     return this.workspaceMemberService.findMembersWithRoles(workspaceId);

@@ -19,7 +19,13 @@ export class WorkspaceRoleService {
     @InjectRepository(Workspace)
     private readonly workspaceRepo: Repository<Workspace>,
   ) {}
-  async create(workspaceId: string, userId: string, roleName: string) {
+  // workspace-role.service.ts
+
+  async create(
+    workspaceId: string,
+    userId: string,
+    createDto: CreateWorkspaceRoleDto,
+  ) {
     // 1. SECURITY CHECK: Are they the owner?
     const workspace = await this.workspaceRepo.findOne({
       where: { id: workspaceId },
@@ -28,15 +34,21 @@ export class WorkspaceRoleService {
     if (!workspace) throw new NotFoundException('Workspace not found');
     if (workspace.owner_id !== userId) {
       throw new ForbiddenException(
-        'Security Alert: Only the workspace owner can create roles.',
+        'Only the workspace owner can create roles.',
       );
     }
 
-    // 2. If they pass the check, create the role
+    // 2. Map permission IDs to Entity objects if permissions are provided
+    const permissionEntities =
+      createDto.permissions?.map((id) => ({ id })) || [];
+
     const newRole = this.roleRepo.create({
-      name: roleName,
+      name: createDto.name,
       workspace_id: workspaceId,
+      // Ensure your Entity has 'permissions' defined as Permission[]
+      permissions: permissionEntities,
     });
+
     return this.roleRepo.save(newRole);
   }
 

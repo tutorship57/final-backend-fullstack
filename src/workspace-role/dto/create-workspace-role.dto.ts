@@ -12,10 +12,9 @@ export class CreateWorkspaceRoleDto {
 
   @IsUUID()
   @IsNotEmpty()
-  workspace_id: string;
+  workspace_id: string; // The backend was rejecting your request because this was missing.
 
-  @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsOptional()
   permissions?: string[];
 }

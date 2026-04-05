@@ -10,7 +10,6 @@ import {
 import { WorkspaceRoleService } from './workspace-role.service';
 import { CreateWorkspaceRoleDto } from './dto/create-workspace-role.dto';
 import { UpdateWorkspaceRoleDto } from './dto/update-workspace-role.dto';
-import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller('users/:user_id/workspace/:workspace_id/roles')
 // @Authorized('user', 'admin', 'superAdmin')
@@ -21,9 +20,11 @@ export class WorkspaceRoleController {
   create(
     @Param('workspace_id') workspaceId: string,
     @Param('user_id') userId: string,
-    @Body('name') roleName: string, // Extract just the name from the body
+    @Body() createDto: CreateWorkspaceRoleDto,
   ) {
-    return this.workspaceRoleService.create(workspaceId, userId, roleName);
+    // Manually assign the ID from the URL to the DTO
+    createDto.workspace_id = workspaceId;
+    return this.workspaceRoleService.create(workspaceId, userId, createDto);
   }
 
   @Get()
