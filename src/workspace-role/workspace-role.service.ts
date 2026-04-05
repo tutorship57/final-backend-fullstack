@@ -1,33 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateWorkspaceRoleDto } from './dto/create-workspace-role.dto';
 import { UpdateWorkspaceRoleDto } from './dto/update-workspace-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WorkspaceRole } from './entities/workspace-role.entity';
 import { Repository } from 'typeorm';
+import { Workspace } from 'src/workspace/entities/workspace.entity';
 
 @Injectable()
 export class WorkspaceRoleService {
   constructor(
     @InjectRepository(WorkspaceRole)
-    private readonly workspaceRoleRepo: Repository<WorkspaceRole>,
+    private readonly roleRepo: Repository<WorkspaceRole>,
+    // Inject the Workspace repo to check ownership!
+    @InjectRepository(Workspace)
+    private readonly workspaceRepo: Repository<Workspace>,
   ) {}
-  async create(createWorkspaceRoleDto: CreateWorkspaceRoleDto) {
-    const { name, workspace_id, permissions } = createWorkspaceRoleDto;
-
-    const newWorkspaceRole = this.workspaceRoleRepo.create({
-      name,
-      workspace_id,
-      permissions: permissions?.map((id) => ({ id })),
+  async create(workspaceId: string, userId: string, roleName: string) {
+    // 1. SECURITY CHECK: Are they the owner?
+    const workspace = await this.workspaceRepo.findOne({
+      where: { id: workspaceId },
     });
-    return await this.workspaceRoleRepo.save(newWorkspaceRole);
+
+    if (!workspace) throw new NotFoundException('Workspace not found');
+    if (workspace.owner_id !== userId) {
+      throw new ForbiddenException(
+        'Security Alert: Only the workspace owner can create roles.',
+      );
+    }
+
+    // 2. If they pass the check, create the role
+    const newRole = this.roleRepo.create({
+      name: roleName,
+      workspace_id: workspaceId,
+    });
+    return this.roleRepo.save(newRole);
   }
 
-  findAll() {
-    return this.workspaceRoleRepo.find();
+  findAll(workspaceId: string) {
+    return this.roleRepo.find({
+      where: { workspace_id: workspaceId },
+    });
   }
-
   findOne(id: string) {
-    return this.workspaceRoleRepo.findOne({
+    return this.roleRepo.findOne({
       where: {
         id: id,
       },
@@ -39,15 +58,12 @@ export class WorkspaceRoleService {
     if (!existRole) {
       throw new NotFoundException();
     }
-    const updated = this.workspaceRoleRepo.merge(
-      existRole,
-      updateWorkspaceRoleDto,
-    );
-    return this.workspaceRoleRepo.save(updated);
+    const updated = this.roleRepo.merge(existRole, updateWorkspaceRoleDto);
+    return this.roleRepo.save(updated);
   }
 
   async remove(id: string) {
-    const removedUser = await this.workspaceRoleRepo.delete(id);
+    const removedUser = await this.roleRepo.delete(id);
     if (removedUser.affected === 0) {
       throw new NotFoundException();
     }

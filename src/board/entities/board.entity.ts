@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Workspace } from 'src/workspace/entities/workspace.entity';
 import { List } from 'src/list/entities/list.entity';
+import { WorkspaceRole } from 'src/workspace-role/entities/workspace-role.entity';
 
 @Entity('boards')
 export class Board {
@@ -38,4 +39,11 @@ export class Board {
 
   @OneToMany(() => List, (list) => list.board)
   lists: List[];
+
+  @Column({ name: 'required_role_id', nullable: true })
+  required_role_id: string;
+
+  @ManyToOne(() => WorkspaceRole)
+  @JoinColumn({ name: 'required_role_id' })
+  requiredRole: WorkspaceRole;
 }

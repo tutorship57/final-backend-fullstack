@@ -12,8 +12,8 @@ import { CreateWorkspaceMemberDto } from './dto/create-workspace-member.dto';
 import { UpdateWorkspaceMemberDto } from './dto/update-workspace-member.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 
-@Controller('workspace-member')
-@Authorized('user', 'admin', 'superAdmin')
+@Controller('users/:user_id')
+// @Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceMemberController {
   constructor(
     private readonly workspaceMemberService: WorkspaceMemberService,
@@ -28,7 +28,26 @@ export class WorkspaceMemberController {
   findAll() {
     return this.workspaceMemberService.findAll();
   }
+  @Get('workspace/:workspaceId/members')
+  findWorkspaceMembers(@Param('workspaceId') workspaceId: string) {
+    return this.workspaceMemberService.findMembersWithRoles(workspaceId);
+  }
 
+  // --- NEW: Assign a role to a member ---
+  @Patch('workspace/:workspaceId/member/:member_id/role')
+  assignRole(
+    @Param('workspace_id') workspaceId: string,
+    @Param('user_id') userId: string,
+    @Param('member_id') memberId: string,
+    @Body('roleId') roleId: string,
+  ) {
+    return this.workspaceMemberService.assignRole(
+      workspaceId,
+      userId,
+      memberId,
+      roleId,
+    );
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.workspaceMemberService.findOne(id);

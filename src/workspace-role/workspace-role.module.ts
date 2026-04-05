@@ -3,9 +3,11 @@ import { WorkspaceRoleService } from './workspace-role.service';
 import { WorkspaceRoleController } from './workspace-role.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WorkspaceRole } from './entities/workspace-role.entity';
+import { WorkspaceModule } from 'src/workspace/workspace.module';
+import { Workspace } from 'src/workspace/entities/workspace.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkspaceRole])],
+  imports: [TypeOrmModule.forFeature([WorkspaceRole,Workspace])],
   controllers: [WorkspaceRoleController],
   providers: [WorkspaceRoleService],
 })

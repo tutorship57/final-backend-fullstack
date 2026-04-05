@@ -11,18 +11,27 @@ import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 
-@Controller('users/:user_id/workspace/:workspace_id')
+@Controller('users/:user_id/workspace/:workspace_id/boards')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Post()
-  create(@Body() createBoardDto: CreateBoardDto) {
-    return this.boardService.create(createBoardDto);
+  create(
+    @Param('workspace_id') workspaceId: string,
+    @Body() createBoardDto: CreateBoardDto,
+  ) {
+    return this.boardService.create({
+      ...createBoardDto,
+      workspace_id: workspaceId,
+    });
   }
 
   @Get()
-  findAll() {
-    return this.boardService.findAll();
+  findAll(
+    @Param('workspace_id') workspaceId: string,
+    @Param('user-id') userId: string,
+  ) {
+    return this.boardService.findBoardWorkspace(workspaceId, userId);
   }
 
   @Get(':id')

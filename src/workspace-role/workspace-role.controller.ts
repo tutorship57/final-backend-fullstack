@@ -12,19 +12,23 @@ import { CreateWorkspaceRoleDto } from './dto/create-workspace-role.dto';
 import { UpdateWorkspaceRoleDto } from './dto/update-workspace-role.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 
-@Controller('workspace-role')
-@Authorized('user', 'admin', 'superAdmin')
+@Controller('users/:user_id/workspace/:workspace_id/roles')
+// @Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceRoleController {
   constructor(private readonly workspaceRoleService: WorkspaceRoleService) {}
 
   @Post()
-  create(@Body() createWorkspaceRoleDto: CreateWorkspaceRoleDto) {
-    return this.workspaceRoleService.create(createWorkspaceRoleDto);
+  create(
+    @Param('workspace_id') workspaceId: string,
+    @Param('user_id') userId: string,
+    @Body('name') roleName: string, // Extract just the name from the body
+  ) {
+    return this.workspaceRoleService.create(workspaceId, userId, roleName);
   }
 
   @Get()
-  findAll() {
-    return this.workspaceRoleService.findAll();
+  findAll(@Param('workspace_id') workspaceId: string) {
+    return this.workspaceRoleService.findAll(workspaceId);
   }
 
   @Get(':id')

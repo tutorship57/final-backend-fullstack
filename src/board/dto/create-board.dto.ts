@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateBoardDto {
   @IsString()
@@ -6,10 +6,10 @@ export class CreateBoardDto {
   title: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   background_url: string;
 
   @IsUUID()
-  @IsNotEmpty()
+  @IsOptional()
   workspace_id: string;
 }

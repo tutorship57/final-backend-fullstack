@@ -39,16 +39,12 @@ export class WorkspaceRepository {
   async findUserWorkspaces(userId: string) {
     return await this.repo
       .createQueryBuilder('workspace')
-      // 1. Join the workspace_members table
-      // 'member' is just an alias we give it for this query
       .leftJoin(
         'workspace_members',
         'member',
         'member.workspace_id = workspace.id',
       )
-      // 2. Check if they are the owner...
       .where('workspace.owner_id = :userId', { userId })
-      // 3. OR check if they are in the members table
       .orWhere('member.user_id = :userId', { userId })
       .getMany();
   }

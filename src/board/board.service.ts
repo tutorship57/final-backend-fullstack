@@ -46,4 +46,46 @@ export class BoardService {
     }
     return { id };
   }
+
+  // 1. Main Function: Only responsible for orchestrating the flow
+  async findBoardWorkspace(workspaceId: string, userId: string) {
+    const { entities, raw } = await this.getBoardsQuery(workspaceId, userId);
+
+    return this.formatBoardsWithTaskCount(entities, raw);
+  }
+
+  // 2. Private Helper: Only responsible for the database query
+  private async getBoardsQuery(workspaceId: string, userId: string) {
+    return await this.boardRepo
+      .createQueryBuilder('board')
+      .innerJoin('workspaces', 'workspace', 'workspace.id = board.workspace_id')
+      .leftJoin(
+        'workspace_members',
+        'member',
+        'member.workspace_id = workspace.id AND member.user_id = :userId',
+      )
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('COUNT(task.id)', 'taskCount')
+          .from('taskCards', 'task')
+          .innerJoin('lists', 'list', 'list.id = task.list_id')
+          .where('list.board_id = board.id');
+      }, 'taskCount')
+      .where('board.workspace_id = :workspaceId', { workspaceId })
+      .andWhere('(workspace.owner_id = :userId OR member.id IS NOT NULL)', {
+        userId,
+      })
+      .getRawAndEntities();
+  }
+
+  // 3. Private Helper: Only responsible for formatting the data
+  private formatBoardsWithTaskCount(entities: Board[], raw: any[]) {
+    return entities.map((board) => {
+      const rawResult = raw.find((r) => r.board_id === board.id);
+      return {
+        ...board,
+        taskCount: parseInt(rawResult?.taskCount || '0', 10),
+      };
+    });
+  }
 }

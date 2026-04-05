@@ -9,5 +9,6 @@ import { WorkspaceRepository } from './workspace.repository';
   imports: [TypeOrmModule.forFeature([Workspace])],
   controllers: [WorkspaceController],
   providers: [WorkspaceService, WorkspaceRepository],
+  exports: [WorkspaceRepository],
 })
 export class WorkspaceModule {}
