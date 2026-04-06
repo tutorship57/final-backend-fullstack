@@ -53,6 +53,8 @@ export class AuthController {
     const { access_token } = this.authService.loginByWithOAuth(user);
     res.cookie('access_token', access_token, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
 
     const redirectUrl = this.configService.get<string>('REDIRECT_URL');
