@@ -10,5 +10,6 @@ import { User } from 'src/user/entities/user.entity';
   imports: [TypeOrmModule.forFeature([WorkspaceMember, Workspace, User])],
   controllers: [WorkspaceMemberController],
   providers: [WorkspaceMemberService],
+  exports: [WorkspaceMemberService, TypeOrmModule],
 })
 export class WorkspaceMemberModule {}

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateWorkspaceMemberDto } from './dto/create-workspace-member.dto';
 import { UpdateWorkspaceMemberDto } from './dto/update-workspace-member.dto';
@@ -54,7 +55,6 @@ export class WorkspaceMemberService {
 
     const isOwner = workspace.owner_id === inviterId;
 
-    // 2. If not owner, check for 'Manage-Member' permission
     if (!isOwner) {
       const inviterMember = await this.workspaceMemberRepo.findOne({
         where: { workspace_id: workspaceId, user_id: inviterId },
@@ -125,6 +125,7 @@ export class WorkspaceMemberService {
       .getMany();
   }
 
+  
   async assignRole(
     workspaceId: string,
     userId: string,

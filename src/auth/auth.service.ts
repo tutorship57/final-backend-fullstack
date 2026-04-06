@@ -57,37 +57,6 @@ export class AuthService {
     return { access_token: access_token };
   }
 
-  async register(createUserDto: RegisterDto) {
-    const { email, name } = createUserDto;
-    const existEmail = await this.userService.findByEmail(email);
-
-    if (existEmail) {
-      throw new ConflictException();
-    }
-
-    const hashedPassword = await this.securityService.hashPassword(
-      createUserDto.password,
-    );
-
-    const newUser = await this.userService.create({
-      email,
-      name,
-    });
-
-    const newProviderData = await this.providerService.create({
-      password: hashedPassword,
-      user: newUser.id,
-      provider: 'local',
-    });
-
-    return {
-      id: newUser.id,
-      email: newUser.email,
-      provider: newProviderData.provider,
-      provider_id: newProviderData.id,
-    };
-  }
-
   async validateOAuthLogin(profile: Profile) {
     const email = profile?.emails?.[0]?.value;
     const picture_url = profile?.photos?.[0].value;
@@ -136,6 +105,39 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async register(createUserDto: RegisterDto) {
+    const { email, name, password } = createUserDto;
+
+    // 1. Check for existing user (Account Enumeration protection is usually
+    // for login; for registration, ConflictException is standard)
+    const existEmail = await this.userService.findByEmail(email);
+    if (existEmail) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
+    const hashedPassword = await this.securityService.hashPassword(password);
+
+    // 3. Create User record
+    const newUser = await this.userService.create({
+      email,
+      name,
+    });
+
+    // 4. Create local provider record linking to user
+    const newProviderData = await this.providerService.create({
+      password: hashedPassword,
+      user: newUser.id,
+      provider: 'local',
+    });
+
+    return {
+      id: newUser.id,
+      email: newUser.email,
+      provider: newProviderData.provider,
     };
   }
 }

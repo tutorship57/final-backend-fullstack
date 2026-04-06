@@ -4,18 +4,39 @@ import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Permission } from './entities/permission.entity';
 import { Repository } from 'typeorm';
+import { Workspace } from 'src/workspace/entities/workspace.entity';
 
 @Injectable()
 export class PermissionService {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionRepo: Repository<Permission>,
+    @InjectRepository(Workspace)
+    private readonly workspaceRepo: Repository<Workspace>,
   ) {}
   create(createPermissionDto: CreatePermissionDto) {
     const newPermisson = this.permissionRepo.create(createPermissionDto);
     return this.permissionRepo.save(newPermisson);
   }
 
+  async findUserPermissions(userId: string, workspaceId: string) {
+    const workspace = await this.workspaceRepo.findOne({
+      where: { id: workspaceId },
+    });
+
+    // Owner returns all permissions defined in the system
+    if (workspace && workspace.owner_id === userId) {
+      return this.permissionRepo.find();
+    }
+
+    return await this.permissionRepo
+      .createQueryBuilder('permission')
+      .innerJoin('permission.roles', 'role')
+      .innerJoin('role.members', 'member')
+      .where('member.user_id = :userId', { userId })
+      .andWhere('member.workspace_id = :workspaceId', { workspaceId })
+      .getMany();
+  }
   findAll() {
     return this.permissionRepo.find();
   }
