@@ -14,6 +14,7 @@ import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,14 +28,14 @@ export class AuthController {
   getProfile(@Req() req) {
     // The JwtAuthGuard will validate the token and attach the user to the request
     // Now you just return that user data to the frontend!
-    return req.user; 
+    return req.user;
   }
 
   @Get('oauth/google')
   @UseGuards(GoogleAuthGuard)
   async oauthLogin() {}
 
-  @Post('/login')
+  @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     const { access_token } = await this.authService.login(loginDto);
     res.cookie('access_token', access_token, {
@@ -44,8 +45,10 @@ export class AuthController {
   }
 
   @Post('register')
-  async register() {}
-
+  async register(@Body() registerDto: RegisterDto) {
+    // We delegate the logic to the service
+    return await this.authService.register(registerDto);
+  }
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   oauthCallback(@Req() req, @Res() res: Response) {

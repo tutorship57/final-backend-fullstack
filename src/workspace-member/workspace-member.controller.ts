@@ -6,11 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { WorkspaceMemberService } from './workspace-member.service';
 import { CreateWorkspaceMemberDto } from './dto/create-workspace-member.dto';
 import { UpdateWorkspaceMemberDto } from './dto/update-workspace-member.dto';
-import { Authorized } from 'src/auth/guards/authorized.decorator';
+import { PermissionGuard } from 'src/permission/guards/permission.guard';
 
 @Controller('users/:user_id')
 // @Authorized('user', 'admin', 'superAdmin')
@@ -28,10 +29,11 @@ export class WorkspaceMemberController {
   findAll() {
     return this.workspaceMemberService.findAll();
   }
-  @Post('workspace/:workspace_id/invite')
+  @Post('workspace/:workspace_id/members/invite')
+  @UseGuards(PermissionGuard('Manage-Member'))
   invite(
     @Param('workspace_id') workspaceId: string,
-    @Param('user_id') inviterId: string, // From URL prefix users/:user_id
+    @Param('user_id') inviterId: string,
     @Body() body: { email: string; roleIds: string[] },
   ) {
     return this.workspaceMemberService.inviteMember(
@@ -48,6 +50,7 @@ export class WorkspaceMemberController {
 
   // --- NEW: Assign a role to a member ---
   @Patch('workspace/:workspaceId/member/:member_id/role')
+  @UseGuards(PermissionGuard('Manage-Role'))
   assignRole(
     @Param('workspace_id') workspaceId: string,
     @Param('user_id') userId: string,

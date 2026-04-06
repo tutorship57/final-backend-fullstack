@@ -1,18 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserRepository } from './user.repository';
-import { userFindOneQuery, UserQueryFilters } from './types/userQueryFilter';
 import { RoleEnum } from './types/role';
+import { UserQueryFilters, userFindOneQuery } from './types/userQueryFilter';
+import { UserRepository } from './user.repository';
+
+// user.service.ts
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.userRepository.create(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    return await this.userRepository.create(createUserDto);
   }
 
   async findAll(filters: UserQueryFilters = {}, role: RoleEnum, id: string) {
+    // You can add logic here to restrict users to only seeing their own data if not admin
     return await this.userRepository.findAll(filters);
   }
 
@@ -27,11 +30,18 @@ export class UserService {
     return await this.userRepository.findByEmail(email);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) throw new Error('User not found');
+
+    // Pass the update to the repository
+    return await this.userRepository.update(id, updateUserDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) throw new Error('User not found');
+
+    return await this.userRepository.delete(id);
   }
 }

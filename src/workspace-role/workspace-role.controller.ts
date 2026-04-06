@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { WorkspaceRoleService } from './workspace-role.service';
 import { CreateWorkspaceRoleDto } from './dto/create-workspace-role.dto';
 import { UpdateWorkspaceRoleDto } from './dto/update-workspace-role.dto';
+import { PermissionGuard } from 'src/permission/guards/permission.guard';
 
 @Controller('users/:user_id/workspace/:workspace_id/roles')
 // @Authorized('user', 'admin', 'superAdmin')
@@ -17,6 +19,7 @@ export class WorkspaceRoleController {
   constructor(private readonly workspaceRoleService: WorkspaceRoleService) {}
 
   @Post()
+  @UseGuards(PermissionGuard('Manage-Role'))
   create(
     @Param('workspace_id') workspaceId: string,
     @Param('user_id') userId: string,

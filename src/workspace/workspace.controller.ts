@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
+  UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { WorkspaceService } from './workspace.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 import { WorkspaceRepository } from './workspace.repository';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('users/:user_id/workspace')
 // @Authorized('user', 'admin', 'superAdmin')
@@ -22,12 +26,20 @@ export class WorkspaceController {
   ) {}
 
   @Post()
-  create(
+  async create(
     @Param('user_id') userId: string,
-    @Body() createWorkspaceDto: CreateWorkspaceDto,
+    @Req() req: any,
+    @Body() dto: CreateWorkspaceDto,
   ) {
+    // PROTECTION: Check if the URL ID matches the Token ID
+    // if (userId !== req.user.sub) {
+    //   throw new ForbiddenException(
+    //     'You cannot create a workspace for another user!',
+    //   );
+    // }
+
     return this.workspaceService.create({
-      ...createWorkspaceDto,
+      ...dto,
       owner_id: userId,
     });
   }
