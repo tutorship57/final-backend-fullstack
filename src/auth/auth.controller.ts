@@ -56,6 +56,8 @@ export class AuthController {
     const { access_token } = this.authService.loginByWithOAuth(user);
     res.cookie('access_token', access_token, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
 
     return res.status(200).json({ message: 'Login successful' });
