@@ -118,6 +118,8 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
+    
+
     // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
     const hashedPassword = await this.securityService.hashPassword(password);
 
