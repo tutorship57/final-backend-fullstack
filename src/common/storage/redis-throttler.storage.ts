@@ -7,9 +7,10 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class RedisThrottlerStorage implements ThrottlerStorage {
-  private redis: Redis;
+  private readonly redis: Redis;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     this.redis = new Redis({
       host: this.configService.get<string>('REDIS_HOST', 'localhost'),
       port: this.configService.get<number>('REDIS_PORT', 6379),
