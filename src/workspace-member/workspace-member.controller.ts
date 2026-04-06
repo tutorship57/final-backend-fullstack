@@ -12,9 +12,10 @@ import { WorkspaceMemberService } from './workspace-member.service';
 import { CreateWorkspaceMemberDto } from './dto/create-workspace-member.dto';
 import { UpdateWorkspaceMemberDto } from './dto/update-workspace-member.dto';
 import { PermissionGuard } from 'src/permission/guards/permission.guard';
+import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller('users/:user_id')
-// @Authorized('user', 'admin', 'superAdmin')
+@Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceMemberController {
   constructor(
     private readonly workspaceMemberService: WorkspaceMemberService,
@@ -78,6 +79,7 @@ export class WorkspaceMemberController {
   }
 
   @Delete(':id')
+  @UseGuards(PermissionGuard('Manage-Member'))
   remove(@Param('id') id: string) {
     return this.workspaceMemberService.remove(id);
   }

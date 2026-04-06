@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   InternalServerErrorException,
   Post,
   Req,
@@ -56,17 +57,30 @@ export class AuthController {
     const { access_token } = this.authService.loginByWithOAuth(user);
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      // secure: true,
+      // sameSite: 'strict',
     });
 
-    return res.status(200).json({ message: 'Login successful' });
+    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
 
-    // if (!redirectUrl) {
-    //   throw new InternalServerErrorException(
-    //     'Redirect URL not found in config',
-    //   );
-    // }
-    // return res.redirect(redirectUrl);
+    if (!redirectUrl) {
+      throw new InternalServerErrorException(
+        'Redirect URL not found in config',
+      );
+    }
+    return res.redirect(redirectUrl);
+  }
+
+  @Post('logout')
+  async logout(@Res() res: Response) {
+    res.clearCookie('access_token', {
+      // Change 'accessToken' to 'access_token'
+      httpOnly: true,
+      secure: true, // Match your login settings
+      sameSite: 'strict',
+      path: '/',
+    });
+
+    return res.status(HttpStatus.OK).json({ message: 'Logout successful' });
   }
 }

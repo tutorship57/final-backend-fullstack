@@ -118,6 +118,12 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
+    const isPwned = await this.securityService.isPasswordPwned(password);
+    if (isPwned) {
+      throw new BadRequestException(
+        'This password has appeared in a data breach. Please choose a more secure password.',
+      );
+    }
     // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
     const hashedPassword = await this.securityService.hashPassword(password);
 

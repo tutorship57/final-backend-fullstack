@@ -10,8 +10,10 @@ import {
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller()
+@Authorized('user', 'admin', 'superAdmin')
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 

@@ -49,6 +49,7 @@ export class WorkspaceRoleController {
   }
 
   @Delete(':id')
+  @UseGuards(PermissionGuard('Manage-Role'))
   remove(@Param('id') id: string) {
     return this.workspaceRoleService.remove(id);
   }

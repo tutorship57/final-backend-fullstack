@@ -18,7 +18,7 @@ import { WorkspaceRepository } from './workspace.repository';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('users/:user_id/workspace')
-// @Authorized('user', 'admin', 'superAdmin')
+@Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceController {
   constructor(
     private readonly workspaceService: WorkspaceService,
