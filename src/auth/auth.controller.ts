@@ -15,6 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -35,11 +36,14 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   async oauthLogin() {}
 
+  @Throttle({ login_limit: { limit: 5, ttl: 60000 } })
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     const { access_token } = await this.authService.login(loginDto);
     res.cookie('access_token', access_token, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
     return res.sendStatus(200);
   }

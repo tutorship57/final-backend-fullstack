@@ -1,6 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
+import {  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -34,7 +32,7 @@ export class AuthService {
       userId: user.id,
     });
     if (!providerInfo || providerInfo.provider != 'local') {
-      throw new BadRequestException();
+      throw new ConflictException();
     }
 
     const passwordMatch = await this.securityService.verifyPassword(
@@ -118,7 +116,7 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
-    
+
 
     // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
     const hashedPassword = await this.securityService.hashPassword(password);

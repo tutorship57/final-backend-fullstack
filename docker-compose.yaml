@@ -1,0 +1,18 @@
+services:
+  # 1. Service ของ Redis
+  redis-server:
+    image: redis:7-alpine
+    container_name: redis_backend
+    restart: always
+    command: redis-server --requirepass my_secure_password # ตั้งรหัสผ่าน
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+volumes:
+  redis_data:
+networks:
+  app-network:
+    
