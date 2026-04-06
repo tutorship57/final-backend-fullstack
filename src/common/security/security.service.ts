@@ -16,25 +16,25 @@ export class SecurityService {
   }
 
   async isPasswordPwned(password: string): Promise<boolean> {
-    // 1. สร้าง SHA-1 Hash และทำให้เป็นตัวพิมพ์ใหญ่
+    // สร้าง SHA-1 Hash และทำให้เป็นตัวใหญ่
     const hash = crypto
       .createHash('sha1')
       .update(password)
       .digest('hex')
       .toUpperCase();
 
-    // 2. แยก 5 ตัวแรก (Prefix) และ ส่วนที่เหลือ (Suffix)
+    // แยก 5 ตัวแรก (Prefix) และ ส่วนที่เหลือ (Suffix)
     const prefix = hash.substring(0, 5);
     const suffix = hash.substring(5);
 
     try {
-      // 3. เรียก HIBP API โดยส่งไปแค่ Prefix
+      // เรียก HIBP API (Have I Been Pwned (HIBP) API) โดยส่งไปแค่ Prefix
       const response = await axios.get(
         `https://api.pwnedpasswords.com/range/${prefix}`,
       );
       const pwnedList = response.data.split('\n');
 
-      // 4. ตรวจสอบว่า Suffix ของเรารวมอยู่ในรายการที่รั่วไหลหรือไม่
+      // ตรวจสอบว่า Suffix อยู่ในรายการที่รั่วไหลมั้ย
       // ข้อมูลที่ตอบกลับมาจะเป็น format "SUFFIX:COUNT"
       const isFound = pwnedList.some((line) => line.startsWith(suffix));
 

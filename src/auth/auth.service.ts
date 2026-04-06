@@ -149,16 +149,17 @@ export class AuthService {
     }
 
     const isPwned = await this.securityService.isPasswordPwned(password);
+    // if pwd pwned login failed
     if (isPwned) {
       throw new BadRequestException(
         'This password has appeared in a data breach. Please choose a more secure password.',
       );
     }
 
-    // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
+    //Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
     const hashedPassword = await this.securityService.hashPassword(password);
 
-    // 3. Create User record
+    // Create User record
     const newUser = await this.userService.create({
       email,
       name,
