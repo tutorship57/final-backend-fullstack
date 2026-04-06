@@ -21,7 +21,10 @@ async function bootstrap() {
   //Middleware: enableCors()
   // - sending Access-Control-Allow-Origin telling the browser that it safe to let 'http://localhost:5173' talk to me(server)
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: [
+      'http://localhost:5173',
+      ...(process.env.CORS_ORIGIN_ALLOW?.split(',') || []),
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
