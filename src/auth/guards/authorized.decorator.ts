@@ -8,4 +8,4 @@ export const Authorized = (...roles: roleType[]) => {
     SetMetadata(ROLES_KEY, roles),
     UseGuards(JwtAuthGuard, RolesGuard), // Order matters: Auth first, then Roles
   );
-}
+};

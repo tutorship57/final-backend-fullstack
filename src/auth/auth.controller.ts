@@ -76,7 +76,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Res() res: Response) {
+  logout(@Res() res: Response) {
     res.clearCookie('access_token', {
       // Change 'accessToken' to 'access_token'
       httpOnly: true,
