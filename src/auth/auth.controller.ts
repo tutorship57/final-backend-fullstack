@@ -58,13 +58,13 @@ export class AuthController {
       httpOnly: true,
     });
 
-    const redirectUrl = this.configService.get<string>('REDIRECT_URL');
+    return res.status(200).json({ message: 'Login successful' });
 
-    if (!redirectUrl) {
-      throw new InternalServerErrorException(
-        'Redirect URL not found in config',
-      );
-    }
-    return res.redirect(redirectUrl);
+    // if (!redirectUrl) {
+    //   throw new InternalServerErrorException(
+    //     'Redirect URL not found in config',
+    //   );
+    // }
+    // return res.redirect(redirectUrl);
   }
 }
