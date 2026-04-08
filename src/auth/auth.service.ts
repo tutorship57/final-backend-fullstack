@@ -141,7 +141,6 @@ export class AuthService {
   async register(createUserDto: RegisterDto) {
     const { email, name, password } = createUserDto;
 
-    // 1. Check for existing user (Account Enumeration protection is usually
     // for login; for registration, ConflictException is standard)
     const existEmail = await this.userService.findByEmail(email);
     if (existEmail) {
@@ -165,7 +164,7 @@ export class AuthService {
       name,
     });
 
-    // 4. Create local provider record linking to user
+    // Create local provider record linking to user
     const newProviderData = await this.providerService.create({
       password: hashedPassword,
       user: newUser.id,
