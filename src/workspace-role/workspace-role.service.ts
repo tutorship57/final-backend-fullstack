@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceRoleDto } from './dto/create-workspace-role.dto';
 import { UpdateWorkspaceRoleDto } from './dto/update-workspace-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
