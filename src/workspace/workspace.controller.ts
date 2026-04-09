@@ -7,16 +7,12 @@ import {
   Param,
   Delete,
   Req,
-  UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 import { WorkspaceService } from './workspace.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 import { WorkspaceRepository } from './workspace.repository';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { PermissionGuard } from 'src/permission/guards/permission.guard';
 
 @Controller('users/:user_id/workspace')
 export class WorkspaceController {
