@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProviderDto } from './dto/create-provider.dto';
-import { UpdateProviderDto } from './dto/update-provider.dto';
+import {
+  UpdateProviderDto,
+  UpdateRefreshTokenDto,
+} from './dto/update-provider.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Provider, ProviderType } from './entities/provider.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
@@ -34,6 +37,7 @@ export class ProviderService {
       throw new Error('Where condition is required');
     }
     const { userId, ...rest } = filters;
+    console.log('this is rest',rest);
     return this.providerRepo.findOne({
       where: {
         ...rest,
@@ -44,6 +48,13 @@ export class ProviderService {
 
   update(id: number, updateProviderDto: UpdateProviderDto) {
     return `This action updates a #${id} provider`;
+  }
+
+  updateRefresh(id: string, updateRefreshDto: UpdateRefreshTokenDto) {
+    return this.providerRepo.update(
+      { id: id }, // Argument ตัวที่ 1: เงื่อนไข (where)
+      { refresh_token: updateRefreshDto.refresh_token }, // Argument ตัวที่ 2: ข้อมูลที่ต้องการเปลี่ยน
+    );
   }
 
   remove(id: number) {

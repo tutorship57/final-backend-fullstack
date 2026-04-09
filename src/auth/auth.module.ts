@@ -7,9 +7,10 @@ import { UserModule } from 'src/user/user.module';
 import { ProviderModule } from 'src/provider/provider.module';
 import { SecurityModule } from 'src/common/security/security.module';
 import { JwtStrategy } from './utils/jwt.stretegy';
+import { JwtRefreshStrategy } from './utils/jwt-refresh.strategy';
 @Module({
   imports: [PassportModule, UserModule, ProviderModule, SecurityModule],
-  providers: [AuthService, GoogleStrategy, JwtStrategy],
+  providers: [AuthService, GoogleStrategy, JwtStrategy, JwtRefreshStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

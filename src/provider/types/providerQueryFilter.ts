@@ -4,4 +4,5 @@ export interface ProviderFindOneQuery {
   provider?: ProviderType;
   sub_id?: string;
   userId?: string;
+  refresh_token?: string;
 }

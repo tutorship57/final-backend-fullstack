@@ -39,6 +39,11 @@ export class Provider {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
+  @Column({
+    nullable: true,
+  })
+  refresh_token: string;
+
   @JoinColumn()
   @OneToOne(() => User, (user) => user.provider)
   user: User;

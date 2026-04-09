@@ -17,6 +17,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -41,8 +42,14 @@ export class AuthController {
   @Throttle({ login_limit: { limit: 5, ttl: 60000 } })
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const { access_token } = await this.authService.login(loginDto);
+    const { access_token, refresh_token } =
+      await this.authService.login(loginDto);
     res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+    res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -57,10 +64,15 @@ export class AuthController {
   }
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  oauthCallback(@Req() req, @Res() res: Response) {
+  async oauthCallback(@Req() req, @Res() res: Response) {
     const user = req.user;
-    const { access_token } = this.authService.loginByWithOAuth(user);
+    const { access_token, refresh_token } = await this.authService.loginByWithOAuth(user);
     res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+    res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -74,6 +86,37 @@ export class AuthController {
       );
     }
     return res.redirect(redirectUrl);
+  }
+
+  @UseGuards(JwtRefreshGuard) // ใช้ Guard ที่เราเพิ่งสร้าง
+  @Post('refresh')
+  async refresh(@Req() req, @Res() res: Response) {
+    // เมื่อผ่าน Guard มาได้ ข้อมูล payload จะอยู่ใน req.user
+    const user = req.user;
+    const refresh_tokenReq = req?.cookies?.['refresh_token'];
+
+    try {
+      // สร้าง Token ชุดใหม่ (ใช้ userId จาก payload ที่ Guard ถอดรหัสมาให้)
+      const { access_token, refresh_token } = await this.authService.getNewRefreshToken(user,refresh_tokenReq)
+      await this.authService.getTokens(user);
+
+      // Set Cookies ใหม่
+      res.cookie('access_token', access_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      });
+      
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      });
+
+      return res.sendStatus(HttpStatus.OK);
+    } catch (e) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'Refresh failed' });
+    }
   }
 
   @Post('logout')

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Profile } from 'passport-google-oauth20';
@@ -52,9 +53,12 @@ export class AuthService {
       sub: user.id,
       role: user.role,
     };
-
-    const access_token = await this.jwtService.signAsync(payload);
-    return { access_token: access_token };
+    const tokens = await this.getTokens(payload);
+    const { refresh_token } = tokens;
+    await this.providerService.updateRefresh(providerInfo.id, {
+      refresh_token,
+    });
+    return tokens;
   }
 
   async validateOAuthLogin(profile: Profile) {
@@ -86,26 +90,52 @@ export class AuthService {
     const providerName = profile.provider;
     const sub_id = profile.id;
 
-    await this.providerService.create({
+    const provider = await this.providerService.create({
       provider: providerName,
       sub_id: sub_id,
       user: newUser.id,
     });
 
-    return { ...newUser, provider: providerName };
+    return { ...newUser, provider_id: provider.id, provider: providerName };
   }
 
-  loginByWithOAuth(oAuthLoginData: OauthLogin) {
+  async getNewRefreshToken(payload: any,oldRefresh:string) {
+    const tokens = await this.getTokens(payload);
+    const { refresh_token } = tokens;
+    const { userId } = payload;
+    const provider = await this.providerService.findOne({
+      userId: userId,
+      refresh_token: oldRefresh,
+    });
+    if (!provider) {
+      throw new UnauthorizedException('something went wrong please login');
+    }
+    await this.providerService.updateRefresh(provider?.id, {
+      refresh_token: refresh_token,
+    });
+
+    return tokens;
+  }
+
+  async loginByWithOAuth(oAuthLoginData: OauthLogin) {
     // 2. ADDED 'role' TO OAUTH LOGIN PAYLOAD
     const payload = {
       email: oAuthLoginData.email,
       sub: oAuthLoginData.id,
       role: oAuthLoginData.role,
     };
-
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    const tokens = await this.getTokens(payload);
+    const { refresh_token } = tokens;
+    const provider = await this.providerService.findOne({
+      userId: oAuthLoginData.id,
+    });
+    if (!provider) {
+      throw new NotFoundException('not found provider');
+    }
+    await this.providerService.updateRefresh(provider.id, {
+      refresh_token,
+    });
+    return tokens;
   }
 
   async register(createUserDto: RegisterDto) {
@@ -145,6 +175,24 @@ export class AuthService {
       id: newUser.id,
       email: newUser.email,
       provider: newProviderData.provider,
+    };
+  }
+
+  async getTokens(payload: any) {
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_ACCESS_SECRET,
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: '7d',
+      }),
+    ]);
+
+    return {
+      access_token: at,
+      refresh_token: rt,
     };
   }
 }
