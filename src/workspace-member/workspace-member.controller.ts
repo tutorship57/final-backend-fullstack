@@ -15,21 +15,21 @@ import { PermissionGuard } from 'src/permission/guards/permission.guard';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 
 @Controller('users/:user_id')
-@Authorized('user', 'admin', 'superAdmin')
+@Authorized('user', 'admin', 'company')
 export class WorkspaceMemberController {
   constructor(
     private readonly workspaceMemberService: WorkspaceMemberService,
   ) {}
-
   @Post()
+  @UseGuards(PermissionGuard('Manage-Member'))
   create(@Body() createWorkspaceMemberDto: CreateWorkspaceMemberDto) {
     return this.workspaceMemberService.create(createWorkspaceMemberDto);
   }
-
   @Get()
   findAll() {
     return this.workspaceMemberService.findAll();
   }
+
   @Post('workspace/:workspace_id/members/invite')
   @UseGuards(PermissionGuard('Manage-Member'))
   invite(
@@ -53,7 +53,7 @@ export class WorkspaceMemberController {
   @Patch('workspace/:workspaceId/member/:member_id/role')
   @UseGuards(PermissionGuard('Manage-Role'))
   assignRole(
-    @Param('workspace_id') workspaceId: string,
+    @Param('workspaceId') workspaceId: string,
     @Param('user_id') userId: string,
     @Param('member_id') memberId: string,
     @Body('roleId') roleId: string,
@@ -71,6 +71,7 @@ export class WorkspaceMemberController {
   }
 
   @Patch(':id')
+  @UseGuards(PermissionGuard('Manage-Member'))
   update(
     @Param('id') id: string,
     @Body() updateWorkspaceMemberDto: UpdateWorkspaceMemberDto,

@@ -1,4 +1,4 @@
-// src/permission/permission.guard.ts
+// src/permission/guards/permission.guard.ts
 import {
   CanActivate,
   ExecutionContext,
@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   mixin,
   Type,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WorkspaceMember } from 'src/workspace-member/entities/workspace-member.entity';
@@ -27,40 +28,79 @@ export const PermissionGuard = (
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest();
 
-      // Extract IDs from request params based on your controller structure
-      const userId = request.params.user_id;
-      const workspaceId =
-        request.params.workspace_id || request.params.workspaceId;
-
-      if (!userId || !workspaceId) {
-        throw new ForbiddenException('User or Workspace ID missing in request');
+      // 1. Get user data from JWT
+      const user = request.user;
+      if (!user || !user.userId) {
+        throw new UnauthorizedException('User not authenticated via token');
       }
 
-      // 1. OWNER BYPASS: Check if the user is the workspace owner
-      const workspace = await this.workspaceRepo.findOne({
-        where: { id: workspaceId },
-      });
-
-      if (workspace && workspace.owner_id === userId) {
+      // 2. GLOBAL BYPASS: Admin/Company check
+      if (user.role === 'admin' || user.role === 'company') {
         return true;
       }
 
-      // 2. PERMISSION CHECK: Check if the member has ANY of the required permissions
-      // We join: member -> roles -> permissions
-      const memberWithPermissions = await this.memberRepo
-        .createQueryBuilder('member')
-        .innerJoin('member.roles', 'role')
-        .innerJoin('role.permissions', 'permission')
-        .where('member.user_id = :userId', { userId })
-        .andWhere('member.workspace_id = :workspaceId', { workspaceId })
-        .andWhere('permission.name IN (:...requiredPermissions)', {
-          requiredPermissions,
-        })
-        .getOne();
-
-      if (!memberWithPermissions) {
+      // 3. Extract Workspace ID from URL
+      const workspaceId =
+        request.params.workspace_id || request.params.workspaceId;
+      if (!workspaceId) {
         throw new ForbiddenException(
-          `Missing required permissions: ${requiredPermissions.join(' or ')}`,
+          'Workspace ID missing in request parameters',
+        );
+      }
+
+      // 4. OWNER BYPASS
+      const workspace = await this.workspaceRepo.findOne({
+        where: { id: workspaceId },
+      });
+      if (workspace && workspace.owner_id === user.userId) {
+        return true;
+      }
+
+      // 5. DETAILED PERMISSION CHECK (NEW LOGIC)
+      // Fetch the member, including all their roles, and the permissions on those roles
+      const member = await this.memberRepo.findOne({
+        where: {
+          user_id: user.userId,
+          workspace_id: workspaceId,
+        },
+        relations: ['roles', 'roles.permissions'], // Safely fetches the ManyToMany data
+      });
+
+      // If they aren't even a member
+      if (!member) {
+        console.log(
+          `[GUARD BLOCK] User ${user.userId} is not a member of Workspace ${workspaceId}`,
+        );
+        throw new ForbiddenException('You are not a member of this workspace.');
+      }
+
+      // Extract all permission names from all roles the user has in this workspace
+      const userPermissions: string[] = [];
+      if (member.roles) {
+        for (const role of member.roles) {
+          if (role.permissions) {
+            for (const perm of role.permissions) {
+              userPermissions.push(perm.name);
+            }
+          }
+        }
+      }
+
+      // DEBUGGING: This will print in your NestJS terminal so you can see exactly what is happening
+      console.log(`-----------------------------------------`);
+      console.log(`[GUARD CHECK] User: ${user.email}`);
+      console.log(`[GUARD CHECK] Route Requires:`, requiredPermissions);
+      console.log(`[GUARD CHECK] User Has Permissions:`, userPermissions);
+      console.log(`-----------------------------------------`);
+
+      // Check if the user has AT LEAST ONE of the required permissions
+      const hasPermission = requiredPermissions.some((reqPerm) =>
+        userPermissions.includes(reqPerm),
+      );
+
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          `You do not have the required workspace permissions: ${requiredPermissions.join(' or ')}`,
         );
       }
 

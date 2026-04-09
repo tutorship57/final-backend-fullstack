@@ -32,11 +32,11 @@ export class WorkspaceRoleService {
     });
 
     if (!workspace) throw new NotFoundException('Workspace not found');
-    if (workspace.owner_id !== userId) {
-      throw new ForbiddenException(
-        'Only the workspace owner can create roles.',
-      );
-    }
+    // if (workspace.owner_id !== userId) {
+    //   throw new ForbiddenException(
+    //     'Only the workspace owner can create roles.',
+    //   );
+    // }
 
     // 2. Map permission IDs to Entity objects if permissions are provided
     const permissionEntities =
@@ -53,6 +53,11 @@ export class WorkspaceRoleService {
   }
 
   findAll(workspaceId: string) {
+    return this.roleRepo.find({
+      where: { workspace_id: workspaceId },
+    });
+  }
+  findMemberRole(workspaceId: string, userId: string) {
     return this.roleRepo.find({
       where: { workspace_id: workspaceId },
     });
