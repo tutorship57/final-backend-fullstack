@@ -1,8 +1,20 @@
 // user.controller.ts
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  Req,
+  ForbiddenException,
+  Post,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Authorized } from 'src/auth/guards/authorized.decorator';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -15,26 +27,36 @@ export class UserController {
   }
 
   @Get()
-  // @Authorized('admin', 'manager')
-  findAll(@Query() filters, @Req() req) {
-    // Passing user role and id from the JWT request
+  @Authorized('admin', 'company')
+  findAll(@Query() filters: any, @Req() req: any) {
     return this.userService.findAll(filters, req.user.role, req.user.sub);
   }
 
   @Get(':id')
-  // @Authorized('admin', 'user')
-  findOne(@Param('id') id: string) {
+  @Authorized('admin', 'company', 'user')
+  findOne(@Param('id') id: string, @Req() req: any) {
+    // SECURITY: If role is 'user', ensure they are only looking at themselves
+    if (req.user.role === 'user' && req.user.sub !== id) {
+      throw new ForbiddenException('You can only view your own profile');
+    }
     return this.userService.findOne({ id });
   }
 
   @Patch(':id')
-  // @Authorized('admin', 'user')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @Authorized('admin', 'user')
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: any,
+  ) {
+    if (req.user.role === 'user' && req.user.sub !== id) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  // @Authorized('admin')
+  @Authorized('admin') // Companies can delete their employees
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }

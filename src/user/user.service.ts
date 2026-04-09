@@ -15,7 +15,8 @@ export class UserService {
   }
 
   async findAll(filters: UserQueryFilters = {}, role: RoleEnum, id: string) {
-    // You can add logic here to restrict users to only seeing their own data if not admin
+    // If a company calls this, they can only see their own staff (if you have that logic)
+    // If an Admin calls this, they can use the role filter passed in query params
     return await this.userRepository.findAll(filters);
   }
 

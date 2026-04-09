@@ -29,10 +29,12 @@ export class PermissionService {
       return this.permissionRepo.find();
     }
 
+    // FIXED: Use manual joins for the many-to-many relationships
     return await this.permissionRepo
       .createQueryBuilder('permission')
       .innerJoin('permission.roles', 'role')
-      .innerJoin('role.members', 'member')
+      .innerJoin('member_roles', 'mr', 'mr.role_id = role.id')
+      .innerJoin('workspace_members', 'member', 'member.id = mr.member_id')
       .where('member.user_id = :userId', { userId })
       .andWhere('member.workspace_id = :workspaceId', { workspaceId })
       .getMany();

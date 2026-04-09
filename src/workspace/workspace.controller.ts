@@ -13,15 +13,16 @@ import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { Authorized } from 'src/auth/guards/authorized.decorator';
 import { WorkspaceRepository } from './workspace.repository';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { PermissionGuard } from 'src/permission/guards/permission.guard';
 
 @Controller('users/:user_id/workspace')
-@Authorized('user', 'admin', 'superAdmin')
 export class WorkspaceController {
   constructor(
     private readonly workspaceService: WorkspaceService,
     private readonly workspaceRepository: WorkspaceRepository,
   ) {}
-
+  @Authorized('admin', 'company')
   @Post()
   async create(
     @Param('user_id') userId: string,
@@ -41,16 +42,19 @@ export class WorkspaceController {
     });
   }
 
+  @Authorized('user', 'admin', 'company')
   @Get()
   findAll(@Param('user_id') userId: string) {
     return this.workspaceRepository.findUserWorkspaces(userId);
   }
 
+  @Authorized('admin', 'company')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.workspaceService.findOne(id);
   }
 
+  @Authorized('admin', 'company')
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -58,7 +62,7 @@ export class WorkspaceController {
   ) {
     return this.workspaceService.update(id, updateWorkspaceDto);
   }
-
+  @Authorized('admin', 'company')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.workspaceService.remove(id);

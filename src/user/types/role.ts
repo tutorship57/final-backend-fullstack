@@ -1,9 +1,9 @@
-export type Role = 'user' | 'admin' | 'manager' | 'merchant' | 'editor';
+import { roleType } from 'src/auth/guards/roles.decorator';
+
+export type Role = roleType;
 
 export enum RoleEnum {
   USER = 'user',
   ADMIN = 'admin',
-  MANAGER = 'manager',
-  MERCHANT = 'merchant',
-  EDITOR = 'editor',
+  COMPANY = 'company',
 }

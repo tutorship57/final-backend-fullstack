@@ -33,12 +33,7 @@ export class LoggingInterceptor implements NestInterceptor {
       }),
       catchError((err) => {
         // log error 500 ด้วย
-        this.logRequest(
-          req,
-          err.status || 500,
-          normalizedIp,
-          err.message,
-        );
+        this.logRequest(req, err.status || 500, normalizedIp, err.message);
         return throwError(() => err);
       }),
     );
