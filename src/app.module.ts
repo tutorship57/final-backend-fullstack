@@ -16,13 +16,36 @@ import { ListModule } from './list/list.module';
 import { JwtModule } from '@nestjs/jwt';
 import { TaskCardModule } from './task-card/task-card.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './interceptor/logging.interceptor';
+import { RedisModule } from './common/storage/redis.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { RedisThrottlerStorage } from './common/storage/redis-throttler.storage';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    RedisModule,
+    ThrottlerModule.forRootAsync({
+      imports: [RedisModule], // ต้อง import module ที่มี storage อยู่
+      inject: [RedisThrottlerStorage], // ฉีด storage เข้ามาใช้งาน
+      useFactory: (storage: RedisThrottlerStorage) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: 60000,
+            limit: 100,
+          },
+          {
+            name: 'login_limit',
+            ttl: 60000,
+            limit: 5,
+          },
+        ],
+        storage, // ส่งก้อน storage ที่ถูก inject แล้วให้ Throttler
+      }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -63,6 +86,10 @@ import { LoggingInterceptor } from './interceptor/logging.interceptor';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

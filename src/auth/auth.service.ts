@@ -34,7 +34,7 @@ export class AuthService {
       userId: user.id,
     });
     if (!providerInfo || providerInfo.provider != 'local') {
-      throw new BadRequestException();
+      throw new ConflictException();
     }
 
     const passwordMatch = await this.securityService.verifyPassword(
@@ -124,6 +124,7 @@ export class AuthService {
         'This password has appeared in a data breach. Please choose a more secure password.',
       );
     }
+
     // 2. Hash password (OWASP: Use strong hashing like Argon2/Bcrypt)
     const hashedPassword = await this.securityService.hashPassword(password);
 
